@@ -9,15 +9,28 @@ import (
 
 const middle = "========="
 
+var conf *Config
+
+func init() {
+	conf = &Config{}
+	conf.initConfig("config.conf")
+}
+
 type Config struct {
 	confMap map[string]string
 	strcet  string
+	path    string
 }
 
-func (c *Config) InitConfig(path string) {
+func (c *Config) initConfig(path string) {
+
 	c.confMap = make(map[string]string)
 
-	f, err := os.Open(path)
+	if path != "" {
+		conf.path = path
+	}
+
+	f, err := os.Open(conf.path)
 	if err != nil {
 		panic(err)
 	}
@@ -89,11 +102,15 @@ func (c *Config) InitConfig(path string) {
 	}
 }
 
-func (c Config) Read(node, key string) string {
+func (c Config) read(node, key string) string {
 	key = node + middle + key
 	v, found := c.confMap[key]
 	if !found {
 		return ""
 	}
 	return v
+}
+
+func Read(node, key string) string {
+	return conf.read(node, key)
 }
