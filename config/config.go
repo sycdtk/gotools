@@ -9,20 +9,20 @@ import (
 
 const middle = "========="
 
-var conf *Config
+var conf *config
 
 func init() {
-	conf = &Config{}
+	conf = &config{}
 	conf.initConfig("config.conf")
 }
 
-type Config struct {
+type config struct {
 	confMap map[string]string
 	strcet  string
 	path    string
 }
 
-func (c *Config) initConfig(path string) {
+func (c *config) initConfig(path string) {
 
 	c.confMap = make(map[string]string)
 
@@ -102,7 +102,7 @@ func (c *Config) initConfig(path string) {
 	}
 }
 
-func (c Config) read(node, key string) string {
+func (c config) read(node, key string) string {
 	key = node + middle + key
 	v, found := c.confMap[key]
 	if !found {
