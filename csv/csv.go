@@ -2,17 +2,45 @@ package csv
 
 import (
 	"encoding/csv"
+	"io"
+	"log"
 	"os"
 )
 
 type CSV struct {
 	name        string //文件名称
 	column, row int    //行列
+	Datas       [][]string
 }
 
 //读取csv文件
-func (c *CSV) Reader(datas *[][]string) {
+func (c *CSV) Reader() {
 
+	file, err := os.Open(c.name)
+	if err != nil {
+		log.Panicln("csv文件打开失败！", err)
+		return
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+
+	for {
+		record, err := reader.Read()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			log.Panicln("csv文件读取失败！", err)
+			return
+		}
+
+		data := []string{}
+		for _, v := range record {
+			data = append(data, v)
+		}
+
+		c.Datas = append(c.Datas, data)
+	}
 }
 
 //写入csv文件
@@ -28,7 +56,7 @@ func (c *CSV) Writer(datas [][]string, append bool) {
 	}
 
 	if err != nil {
-		panic(err)
+		log.Panic("创建csv文件失败!", err)
 	}
 	defer f.Close()
 

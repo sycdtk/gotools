@@ -3,6 +3,7 @@ package config
 import (
 	"bufio"
 	"io"
+	"log"
 	"os"
 	"strings"
 )
@@ -35,7 +36,7 @@ func (c *config) initConfig(path string) {
 
 	f, err := os.Open(conf.path)
 	if err != nil {
-		panic(err)
+		log.Panicln("读取配置文件失败！", err)
 	}
 	defer f.Close()
 

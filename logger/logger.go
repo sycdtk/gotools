@@ -4,6 +4,8 @@ import (
 	"log"
 	"os"
 	"sync"
+
+	"github.com/sycdtk/gotools/config"
 )
 
 const (
@@ -55,9 +57,13 @@ func NewLogger() *Logger {
 
 		filePath := config.Read("logger", "path")
 
+		if len(filePath) == 0 {
+			filePath = "logger.log" //默认日志文件
+		}
+
 		file, err := os.Create(filePath)
 		if err != nil {
-			log.Fatalln("创建日志失败!")
+			log.Panicln("创建日志失败!", err)
 		}
 		logstd := log.New(file, "", log.LstdFlags|log.Lshortfile)
 
