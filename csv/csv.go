@@ -16,9 +16,16 @@ func (c *CSV) Reader(datas *[][]string) {
 }
 
 //写入csv文件
-func (c *CSV) Writer(datas [][]string) {
+func (c *CSV) Writer(datas [][]string, append bool) {
 
-	f, err := os.Create(c.name) //创建文件
+	var f *os.File
+	var err error
+
+	if append {
+		f, err = os.OpenFile(c.name, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666) //追加
+	} else {
+		f, err = os.Create(c.name) //创建文件
+	}
 
 	if err != nil {
 		panic(err)

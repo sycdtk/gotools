@@ -5,15 +5,15 @@ import (
 )
 
 func TestNewCSV(t *testing.T) {
-	c := NewCSV("a.csv")
+	c := NewCSV("test.csv")
 
 	data := [][]string{
-		{"1", "aa", "你好！"},
-		{"2", "bb", "不好！"},
-		{"3", "cc", "好吧！"},
+		{"天津", "1", "aa", "你好！"},
+		{"北京", "2", "bb", "不好！"},
+		{"乌鲁木齐", "3", "cc", "好吧！"},
 	}
 
-	c.Writer(data)
+	c.Writer(data, true)
 
 	t.Log("success!")
 }

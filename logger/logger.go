@@ -1,52 +1,71 @@
 package logger
 
 import (
-	"fmt"
+	"log"
 	"os"
-	"time"
+	"sync"
 )
 
 const (
-	//是否写日志文件
-	writeFile = false
-	//日志文件名称
-	logFile = "logger.log"
 	//日志级别
-	L_DEBUG = 1 << 0
-	L_INFO  = 1 << 1
-	L_ERROR = 1 << 2
+	Ldebug = 1 << 0
+	Linfo  = 1 << 1
 )
 
-//默认级别，显示info和error
-var level = L_INFO | L_ERROR
+type Logger struct {
+	*log.Logger
+	level int //日志级别
+	m     *sync.Mutex
+}
 
-func init() {
-	if writeFile {
-		f, _ := os.OpenFile(logFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0755)
-		os.Stdout = f
-		os.Stderr = f
+//设置日志级别
+func (l *Logger) SetLevel(lvl int) {
+	l.level = lvl
+}
+
+//debug输出，包含info输出
+func (l *Logger) Debug(v ...interface{}) {
+	if Ldebug == l.level&Ldebug {
+		l.m.Lock()
+		l.Logger.SetPrefix("D: ")
+		l.Logger.Println(v)
+		l.Logger.SetPrefix("   ")
+		l.m.Unlock()
 	}
 }
 
-//设置日志级别，例如：logger.L_INFO | logger.L_ERROR
-func SetLevel(l int) {
-	level = l
-}
-
-func Debug(msg string) {
-	if L_DEBUG == level&L_DEBUG {
-		fmt.Println(time.Now().Format("2006-01-02 15:04:05"), "[DEBUG]:", msg)
+//info输出
+func (l *Logger) Info(v ...interface{}) {
+	if Linfo == l.level&Linfo || Ldebug == l.level&Ldebug {
+		l.m.Lock()
+		l.Logger.SetPrefix("I: ")
+		l.Logger.Println(v)
+		l.Logger.SetPrefix("   ")
+		l.m.Unlock()
 	}
 }
 
-func Info(msg string) {
-	if L_INFO == level&L_INFO {
-		fmt.Println(time.Now().Format("2006-01-02 15:04:05"), "[INFO ]:", msg)
-	}
-}
+var mylogger *Logger
+var once sync.Once
 
-func Error(msg string) {
-	if L_ERROR == level&L_ERROR {
-		fmt.Println(time.Now().Format("2006-01-02 15:04:05"), "[ERROR]:", msg)
-	}
+func NewLogger() *Logger {
+
+	//仅执行一次，单例
+	once.Do(func() {
+
+		filePath := config.Read("logger", "path")
+
+		file, err := os.Create(filePath)
+		if err != nil {
+			log.Fatalln("创建日志失败!")
+		}
+		logstd := log.New(file, "", log.LstdFlags|log.Lshortfile)
+
+		mylogger = &Logger{logstd, Ldebug, new(sync.Mutex)} //默认级别
+		mylogger.SetOutput(file)                            //设置标准输出
+		mylogger.SetFlags(log.LstdFlags | log.Lshortfile)   //设置输出格式
+	})
+
+	return mylogger
+
 }

@@ -7,17 +7,20 @@ import (
 	"strings"
 )
 
-const middle = "========="
+const (
+	configName = "config.conf" //默认配置文件名称
+)
 
 var conf *config
 
+//初始化
 func init() {
 	conf = &config{}
-	conf.initConfig("config.conf")
+	conf.initConfig(configName)
 }
 
 type config struct {
-	confMap map[string]string
+	confMap map[string]string //配置信息
 	strcet  string
 	path    string
 }
@@ -97,13 +100,13 @@ func (c *config) initConfig(path string) {
 			continue
 		}
 
-		key := c.strcet + middle + frist
+		key := c.strcet + frist
 		c.confMap[key] = strings.TrimSpace(second)
 	}
 }
 
 func (c config) read(node, key string) string {
-	key = node + middle + key
+	key = node + key
 	v, found := c.confMap[key]
 	if !found {
 		return ""
@@ -111,6 +114,7 @@ func (c config) read(node, key string) string {
 	return v
 }
 
+//读取配置信息，node：分组，key：属性
 func Read(node, key string) string {
 	return conf.read(node, key)
 }
