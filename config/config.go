@@ -46,8 +46,10 @@ func (c *config) initConfig(path string) {
 		if err != nil {
 			if err == io.EOF {
 				break
+			} else {
+				log.Panicln("csv文件读取失败！", err)
+				return
 			}
-			panic(err)
 		}
 
 		s := strings.TrimSpace(string(b))
