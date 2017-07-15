@@ -5,22 +5,20 @@ import (
 )
 
 func TestNewLogger(t *testing.T) {
-	l1 := NewLogger()
-	l2 := NewLogger()
 
-	l1.Debug("1 - aaaa")
-	l1.Debug("1 - bbbb")
-	l1.Debug("1 - cccc")
+	Debug("1 - aaaa")
+	Debug("1 - bbbb")
+	Debug("1 - cccc")
 
-	l2.Debug("2 - aaaa")
+	Debug("2 - aaaa")
 
-	l1.Info("1 info - dddd")
-	l1.Debug("1 - eeee")
-	l2.Info("2 info bbbb")
+	Info("1 info - dddd")
+	Debug("1 - eeee")
+	Info("2 info bbbb")
 
-	l2.SetLevel("INFO")
+	SetLevel("INFO")
 
-	l1.Info("11 info - ffff")
-	l1.Debug("1 - gggg")
-	l2.Info("2 info cccc")
+	Info("11 info - ffff")
+	Debug("1 - gggg")
+	Info("2 info cccc")
 }

@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -23,42 +24,45 @@ type Logger struct {
 	m     *sync.Mutex
 }
 
-//设置日志级别
-func (l *Logger) SetLevel(lvl string) {
-	if lvl == DEBUG {
-		l.level = ldebug
-	} else if lvl == INFO {
-		l.level = linfo
-	}
+var mylogger *Logger
+var once sync.Once
 
+func init() {
+	NewLogger()
+}
+
+//设置日志级别
+func SetLevel(lvl string) {
+	if lvl == DEBUG {
+		mylogger.level = ldebug
+	} else if lvl == INFO {
+		mylogger.level = linfo
+	}
 }
 
 //debug输出，包含info输出
-func (l *Logger) Debug(v ...interface{}) {
-	if ldebug == l.level&ldebug {
-		l.m.Lock()
-		l.Logger.SetPrefix("D: ")
-		l.Logger.Println(v)
-		l.Logger.SetPrefix("   ")
-		l.m.Unlock()
+func Debug(v ...interface{}) {
+	if ldebug == mylogger.level&ldebug {
+		mylogger.m.Lock()
+		mylogger.Logger.SetPrefix("D: ")
+		mylogger.Logger.Output(2, fmt.Sprintln(v))
+		mylogger.Logger.SetPrefix("   ")
+		mylogger.m.Unlock()
 	}
 }
 
 //info输出
-func (l *Logger) Info(v ...interface{}) {
-	if linfo == l.level&linfo || ldebug == l.level&ldebug {
-		l.m.Lock()
-		l.Logger.SetPrefix("I: ")
-		l.Logger.Println(v)
-		l.Logger.SetPrefix("   ")
-		l.m.Unlock()
+func Info(v ...interface{}) {
+	if linfo == mylogger.level&linfo || ldebug == mylogger.level&ldebug {
+		mylogger.m.Lock()
+		mylogger.Logger.SetPrefix("I: ")
+		mylogger.Logger.Output(2, fmt.Sprintln(v))
+		mylogger.Logger.SetPrefix("   ")
+		mylogger.m.Unlock()
 	}
 }
 
-var mylogger *Logger
-var once sync.Once
-
-func NewLogger() *Logger {
+func NewLogger() {
 
 	//仅执行一次，单例
 	once.Do(func() {
@@ -86,12 +90,9 @@ func NewLogger() *Logger {
 		mylogger = &Logger{logstd, ldebug, new(sync.Mutex)} //默认级别
 
 		if len(logLevel) > 0 {
-			mylogger.SetLevel(logLevel) //设置日志级别
+			SetLevel(logLevel) //设置日志级别
 		}
 
 		mylogger.SetFlags(log.LstdFlags | log.Lshortfile) //设置输出格式
 	})
-
-	return mylogger
-
 }
