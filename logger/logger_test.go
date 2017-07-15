@@ -18,7 +18,7 @@ func TestNewLogger(t *testing.T) {
 	l1.Debug("1 - eeee")
 	l2.Info("2 info bbbb")
 
-	l2.SetLevel(Linfo)
+	l2.SetLevel("INFO")
 
 	l1.Info("11 info - ffff")
 	l1.Debug("1 - gggg")

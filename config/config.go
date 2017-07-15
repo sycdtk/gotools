@@ -26,6 +26,10 @@ type config struct {
 	path    string
 }
 
+//读取配置文件，文件格式：
+//[组名]
+//属性1=值1
+//属性2=值2
 func (c *config) initConfig(path string) {
 
 	c.confMap = make(map[string]string)
@@ -117,7 +121,7 @@ func (c config) read(node, key string) string {
 	return v
 }
 
-//读取配置信息，node：分组，key：属性
+//读取配置信息，node：组名，key：属性
 func Read(node, key string) string {
 	return conf.read(node, key)
 }

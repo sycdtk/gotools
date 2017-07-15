@@ -10,8 +10,11 @@ import (
 
 const (
 	//日志级别
-	Ldebug = 1 << 0
-	Linfo  = 1 << 1
+	ldebug = 1 << 0
+	linfo  = 1 << 1
+
+	DEBUG = "DEBUG"
+	INFO  = "INFO"
 )
 
 type Logger struct {
@@ -21,13 +24,18 @@ type Logger struct {
 }
 
 //设置日志级别
-func (l *Logger) SetLevel(lvl int) {
-	l.level = lvl
+func (l *Logger) SetLevel(lvl string) {
+	if lvl == DEBUG {
+		l.level = ldebug
+	} else if lvl == INFO {
+		l.level = linfo
+	}
+
 }
 
 //debug输出，包含info输出
 func (l *Logger) Debug(v ...interface{}) {
-	if Ldebug == l.level&Ldebug {
+	if ldebug == l.level&ldebug {
 		l.m.Lock()
 		l.Logger.SetPrefix("D: ")
 		l.Logger.Println(v)
@@ -38,7 +46,7 @@ func (l *Logger) Debug(v ...interface{}) {
 
 //info输出
 func (l *Logger) Info(v ...interface{}) {
-	if Linfo == l.level&Linfo || Ldebug == l.level&Ldebug {
+	if linfo == l.level&linfo || ldebug == l.level&ldebug {
 		l.m.Lock()
 		l.Logger.SetPrefix("I: ")
 		l.Logger.Println(v)
@@ -55,21 +63,33 @@ func NewLogger() *Logger {
 	//仅执行一次，单例
 	once.Do(func() {
 
-		filePath := config.Read("logger", "path")
+		filePath := config.Read("log", "path")
+		logLevel := config.Read("log", "level")
 
-		if len(filePath) == 0 {
-			filePath = "logger.log" //默认日志文件
+		println(filePath)
+
+		var logstd *log.Logger
+
+		if len(filePath) != 0 { //日志文件
+
+			file, err := os.Create(filePath)
+			if err != nil {
+				log.Panicln("创建日志失败!", err)
+			}
+
+			logstd = log.New(file, "", log.LstdFlags|log.Lshortfile) //构建默认log对象
+
+		} else { //标准输出
+			logstd = log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile) //构建默认log对象
 		}
 
-		file, err := os.Create(filePath)
-		if err != nil {
-			log.Panicln("创建日志失败!", err)
-		}
-		logstd := log.New(file, "", log.LstdFlags|log.Lshortfile)
+		mylogger = &Logger{logstd, ldebug, new(sync.Mutex)} //默认级别
 
-		mylogger = &Logger{logstd, Ldebug, new(sync.Mutex)} //默认级别
-		mylogger.SetOutput(file)                            //设置标准输出
-		mylogger.SetFlags(log.LstdFlags | log.Lshortfile)   //设置输出格式
+		if len(logLevel) > 0 {
+			mylogger.SetLevel(logLevel) //设置日志级别
+		}
+
+		mylogger.SetFlags(log.LstdFlags | log.Lshortfile) //设置输出格式
 	})
 
 	return mylogger
