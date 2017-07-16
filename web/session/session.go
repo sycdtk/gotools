@@ -65,19 +65,15 @@ func (sm *SessionManager) Start(w http.ResponseWriter, r *http.Request) (session
 
 		cookie := http.Cookie{Name: sm.cookieName, Value: url.QueryEscape(sessionID), Path: "/", HttpOnly: true, MaxAge: int(sm.maxLifeTime)}
 		http.SetCookie(w, &cookie)
-	} else if err != nil || cookie.Value == "" { //非登录页面，cookie为空，跳转页面
+	} else if err != nil || cookie.Value == "" { //非登录页面，cookie为空，跳转登录页面
 		expiration := time.Now()
 		cookie := http.Cookie{Name: sm.cookieName, Expires: expiration, Path: "/", HttpOnly: true, MaxAge: -1}
 		http.SetCookie(w, &cookie)
 		logger.Info("session ID 不存在，页面跳转至登录界面！")
 		http.Redirect(w, r, "/login", http.StatusFound)
-	} else {
+	} else { //cookie value值不为空
 
-		sessionID, err := url.QueryUnescape(cookie.Value)
-
-		if err != nil {
-			logger.Err("读取session失败！")
-		}
+		sessionID, _ := url.QueryUnescape(cookie.Value)
 
 		if sm.provider.Check(sessionID) { //session Id 存在则读取
 			session, _ = sm.provider.Read(sessionID)
