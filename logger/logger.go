@@ -77,6 +77,17 @@ func Err(v ...interface{}) {
 	}
 }
 
+//error 输出调用文件路径为递归三层
+func Err3(v ...interface{}) {
+	if linfo == mylogger.level&linfo || ldebug == mylogger.level&ldebug || lerror == mylogger.level&lerror {
+		mylogger.m.Lock()
+		mylogger.Logger.SetPrefix("E: ")
+		mylogger.Logger.Output(3, fmt.Sprintln(v))
+		mylogger.Logger.SetPrefix("   ")
+		mylogger.m.Unlock()
+	}
+}
+
 func NewLogger() {
 
 	//仅执行一次，单例
