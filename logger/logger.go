@@ -11,11 +11,13 @@ import (
 
 const (
 	//日志级别
-	ldebug = 1 << 0
-	linfo  = 1 << 1
+	lerror = 1 << 0
+	ldebug = 1 << 1
+	linfo  = 1 << 2
 
 	DEBUG = "DEBUG"
 	INFO  = "INFO"
+	ERROR = "ERROR"
 )
 
 type Logger struct {
@@ -37,6 +39,8 @@ func SetLevel(lvl string) {
 		mylogger.level = ldebug
 	} else if lvl == INFO {
 		mylogger.level = linfo
+	} else if lvl == ERROR {
+		mylogger.level = lerror
 	}
 }
 
@@ -62,6 +66,17 @@ func Info(v ...interface{}) {
 	}
 }
 
+//error输出
+func Err(v ...interface{}) {
+	if linfo == mylogger.level&linfo || ldebug == mylogger.level&ldebug || lerror == mylogger.level&lerror {
+		mylogger.m.Lock()
+		mylogger.Logger.SetPrefix("E: ")
+		mylogger.Logger.Output(2, fmt.Sprintln(v))
+		mylogger.Logger.SetPrefix("   ")
+		mylogger.m.Unlock()
+	}
+}
+
 func NewLogger() {
 
 	//仅执行一次，单例
@@ -69,8 +84,6 @@ func NewLogger() {
 
 		filePath := config.Read("log", "path")
 		logLevel := config.Read("log", "level")
-
-		println(filePath)
 
 		var logstd *log.Logger
 

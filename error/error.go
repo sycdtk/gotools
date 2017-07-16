@@ -1,12 +1,20 @@
-package err
+package error
 
 import (
-	"log"
+	"errors"
+
+	"github.com/sycdtk/gotools/logger"
 )
 
+//创建异常
+func NewErr(errStr string) (obj interface{}, err error) {
+	logger.Info(errStr)
+	return nil, errors.New(errStr)
+}
+
 //检查错误
-func CheckError(err error) {
+func CheckErr(err error) {
 	if err != nil {
-		log.Panicln("异常：", err)
+		log.Panicln("异常!", err)
 	}
 }

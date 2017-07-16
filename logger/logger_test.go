@@ -6,19 +6,19 @@ import (
 
 func TestNewLogger(t *testing.T) {
 
-	Debug("1 - aaaa")
-	Debug("1 - bbbb")
-	Debug("1 - cccc")
+	Debug("a 1")
+	Info("a 2")
+	Err("a 3")
 
-	Debug("2 - aaaa")
+	SetLevel(INFO)
 
-	Info("1 info - dddd")
-	Debug("1 - eeee")
-	Info("2 info bbbb")
+	Debug("b 1")
+	Info("b 2")
+	Err("b 3")
 
-	SetLevel("INFO")
+	SetLevel(ERROR)
+	Debug("c 1")
+	Info("c 2")
+	Err("c 3")
 
-	Info("11 info - ffff")
-	Debug("1 - gggg")
-	Info("2 info cccc")
 }
