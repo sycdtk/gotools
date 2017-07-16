@@ -3,8 +3,9 @@ package csv
 import (
 	"encoding/csv"
 	"io"
-	"log"
 	"os"
+
+	"github.com/sycdtk/gotools/errtools"
 )
 
 type CSV struct {
@@ -17,10 +18,9 @@ type CSV struct {
 func (c *CSV) Reader() {
 
 	file, err := os.Open(c.name)
-	if err != nil {
-		log.Panicln("csv文件打开失败！", err)
-		return
-	}
+
+	errtools.CheckErr(err, "csv文件打开失败！")
+
 	defer file.Close()
 
 	reader := csv.NewReader(file)
@@ -29,10 +29,9 @@ func (c *CSV) Reader() {
 		record, err := reader.Read()
 		if err == io.EOF {
 			break
-		} else if err != nil {
-			log.Panicln("csv文件读取失败！", err)
-			return
 		}
+
+		errtools.CheckErr(err, "csv文件读取失败！")
 
 		data := []string{}
 		for _, v := range record {
@@ -47,17 +46,17 @@ func (c *CSV) Reader() {
 func (c *CSV) Writer(datas [][]string, append bool) {
 
 	var f *os.File
-	var err error
 
 	if append {
-		f, err = os.OpenFile(c.name, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666) //追加
+		file, err := os.OpenFile(c.name, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666) //追加
+		errtools.CheckErr(err, "读取csv文件失败!")
+		f = file
 	} else {
-		f, err = os.Create(c.name) //创建文件
+		file, err := os.Create(c.name) //创建文件
+		errtools.CheckErr(err, "创建csv文件失败!")
+		f = file
 	}
 
-	if err != nil {
-		log.Panic("创建csv文件失败!", err)
-	}
 	defer f.Close()
 
 	f.WriteString("\xEF\xBB\xBF") // 写入UTF-8 BOM
