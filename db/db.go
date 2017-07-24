@@ -79,10 +79,10 @@ func (c *DBContext) Create(sql string, args ...interface{}) {
 // Read  "SELECT * FROM users"
 func (c *DBContext) Read(sql string, args ...interface{}) {
 
-	rows, err := c.db.Query(sql, args...)
-	errtools.CheckErr(err, "查询失败:", sql, args)
+	//	rows, err := c.db.Query(sql, args...)
+	//	errtools.CheckErr(err, "查询失败:", sql, args)
 
-	defer rows.Close()
+	//	defer rows.Close()
 
 	//	for rows.Next() {
 	//		err := rows.Scan(&result)

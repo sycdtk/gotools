@@ -28,6 +28,13 @@ func TestDB(t *testing.T) {
         age INTEGER
     )`)
 
+	DefaultDB().Create(`CREATE TABLE
+    Chair
+    (
+        ID INTEGER,
+        Day TEXT
+    )`)
+
 	DefaultDB().Create("INSERT INTO users(name,age) values(?,?)", "lirui", 20)
 
 	DefaultDB().Update("UPDATE users SET age = ? WHERE name = ?", 18, "lirui")
