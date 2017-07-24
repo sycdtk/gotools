@@ -33,5 +33,8 @@ func TestDB(t *testing.T) {
 	chair.Day = "asdfasfd"
 
 	Register(&Chair{})
+
+	DropTable(&Chair{})
+	CreateTable(&Chair{})
 	Save(chair)
 }

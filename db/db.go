@@ -59,8 +59,8 @@ func connectDB(driverName string, dbName string) (*DBContext, error) {
 	return &DBContext{db}, nil
 }
 
-// Create  "INSERT INTO users(name,age) values(?,?)"
-func (c *DBContext) Create(sql string, args ...interface{}) {
+// Execute  "INSERT INTO users(name,age) values(?,?)"
+func (c *DBContext) Execute(sql string, args ...interface{}) {
 	stmt, err := c.db.Prepare(sql)
 
 	errtools.CheckErr(err, "创建Prepare失败:", sql, args)
@@ -76,8 +76,8 @@ func (c *DBContext) Create(sql string, args ...interface{}) {
 	logger.Debug("创建完成：", sql, args, lastID)
 }
 
-// Read  "SELECT * FROM users"
-func (c *DBContext) Read(sql string, args ...interface{}) {
+// Query  "SELECT * FROM users"
+func (c *DBContext) Query(sql string, args ...interface{}) {
 
 	//	rows, err := c.db.Query(sql, args...)
 	//	errtools.CheckErr(err, "查询失败:", sql, args)

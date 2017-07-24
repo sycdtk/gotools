@@ -52,6 +52,72 @@ func Register(stru interface{}) {
 
 }
 
+//创建数据库表
+func CreateTable(stru interface{}) {
+	st := reflect.TypeOf(stru)
+	if st.Kind() == reflect.Ptr {
+		st = st.Elem()
+	}
+
+	if si, ok := struMap[st.PkgPath()+":"+st.Name()]; ok { //结构体已注册
+		sql := new(bytes.Buffer) //创建sql
+
+		sql.WriteString("CREATE TABLE ")
+
+		sql.WriteString(si.TableName)
+
+		sql.WriteString(" (")
+
+		for i := 0; i < len(si.FieldNames); i++ {
+
+			sft, _ := st.FieldByName(si.FieldNames[i])
+
+			sql.WriteString(si.FieldColumns[i])
+			sql.WriteString(" ")
+			sql.WriteString(typeToDB(sft.Type))
+
+			if i != len(si.FieldNames)-1 {
+				sql.WriteString(",")
+			}
+		}
+
+		sql.WriteString(");")
+
+		db.DefaultDB().Execute(sql.String())
+
+		logger.Debug(sql.String())
+
+	} else { //结构体未注册
+		logger.Err(st.PkgPath(), st.Name(), "结构体未注册！")
+	}
+}
+
+//删除数据库表
+func DropTable(stru interface{}) {
+	st := reflect.TypeOf(stru)
+	if st.Kind() == reflect.Ptr {
+		st = st.Elem()
+	}
+
+	if si, ok := struMap[st.PkgPath()+":"+st.Name()]; ok { //结构体已注册
+		sql := new(bytes.Buffer) //创建sql
+
+		sql.WriteString("DROP TABLE ")
+
+		sql.WriteString(si.TableName)
+
+		sql.WriteString(";")
+
+		db.DefaultDB().Execute(sql.String())
+
+		logger.Debug(sql.String())
+
+	} else { //结构体未注册
+		logger.Err(st.PkgPath(), st.Name(), "结构体未注册！")
+	}
+}
+
+//保存数据对象
 func Save(stru interface{}) {
 	st := reflect.TypeOf(stru)
 	if st.Kind() == reflect.Ptr {
@@ -78,16 +144,9 @@ func Save(stru interface{}) {
 
 		}
 
-		db.DefaultDB().Create(`CREATE TABLE
-	    device_chair
-	    (
-	        ID INTEGER,
-	        Day TEXT
-	    )`)
-
 		sql := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", si.TableName, names.String()[1:], values.String()[1:])
 
-		db.DefaultDB().Create(sql, args...)
+		db.DefaultDB().Execute(sql, args...)
 
 		logger.Debug(sql)
 
@@ -98,6 +157,14 @@ func Save(stru interface{}) {
 }
 
 func SaveAll() {
+
+}
+
+func Query() {
+
+}
+
+func QueryAll() {
 
 }
 
@@ -113,6 +180,47 @@ func Delete() {
 
 }
 
+//根据数据类型，转换为数据库对应字段类型，此处对应关系将依赖于数据库
+func typeToDB(rt reflect.Type) string {
+
+	switch rt.Kind() {
+	//	case reflect.Bool:
+
+	case reflect.Int:
+		fallthrough
+	case reflect.Int16:
+		fallthrough
+	case reflect.Int32:
+		fallthrough
+	case reflect.Int64:
+		return "INTEGER"
+		//	case reflect.Uint:
+		//	case reflect.Uint8:
+		//	case reflect.Uint16:
+		//	case reflect.Uint32:
+		//	case reflect.Uint64:
+		//	case reflect.Uintptr:
+		//	case reflect.Float32:
+		//	case reflect.Float64:
+		//	case reflect.Complex64:
+		//	case reflect.Complex128:
+		//	case reflect.Array:
+		//	case reflect.Chan:
+		//	case reflect.Func:
+		//	case reflect.Interface:
+		//	case reflect.Map:
+		//	case reflect.Ptr:
+		//	case reflect.Slice:
+	case reflect.String:
+		return "TEXT"
+	//	case reflect.Struct:
+	//	case reflect.UnsafePointer:
+	default:
+		return ""
+	}
+}
+
+//reflect.Value值转换为实际的数据类型，目前仅考虑支持bool、整形、浮点、字符串、日期类型
 func realValue(rv reflect.Value) interface{} {
 	switch rv.Kind() {
 	//	case reflect.Bool:
