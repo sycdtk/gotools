@@ -141,7 +141,6 @@ func Save(stru interface{}) {
 			names.WriteString(si.FieldColumns[i])
 			values.WriteString("?")
 			args = append(args, realValue(sfv))
-
 		}
 
 		sql := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", si.TableName, names.String()[1:], values.String()[1:])
@@ -160,8 +159,40 @@ func SaveAll() {
 
 }
 
-func Query() {
+func Query(stru interface{}) {
+	st := reflect.TypeOf(stru)
+	if st.Kind() == reflect.Ptr {
+		st = st.Elem()
+	}
 
+	if si, ok := struMap[st.PkgPath()+":"+st.Name()]; ok { //结构体已注册
+
+		names := new(bytes.Buffer) //字段名
+		args := []interface{}{}    //参数值
+
+		sv := reflect.Indirect(reflect.ValueOf(stru)) //获取持久化对象的值
+		for i := 0; i < len(si.FieldNames); i++ {
+
+			sfv := sv.FieldByName(si.FieldNames[i])
+
+			names.WriteString(",")
+			names.WriteString(si.FieldColumns[i])
+
+			args = append(args, realValue(sfv))
+
+		}
+
+		sql := fmt.Sprintf("SELECT %s FROM %s ;", names.String()[1:], si.TableName)
+
+		//		results := [][]interface{}{}
+
+		db.DefaultDB().Execute(sql, args...)
+
+		logger.Debug(sql)
+
+	} else { //结构体未注册
+		logger.Err(st.PkgPath(), st.Name(), "结构体未注册！")
+	}
 }
 
 func QueryAll() {
@@ -178,6 +209,46 @@ func UpdateAll() {
 
 func Delete() {
 
+}
+
+//判断各个类型的空值
+func nilValue(rt reflect.Type) interface{} {
+
+	switch rt.Kind() {
+	//	case reflect.Bool:
+
+	case reflect.Int:
+		fallthrough
+	case reflect.Int16:
+		fallthrough
+	case reflect.Int32:
+		fallthrough
+	case reflect.Int64:
+		return 0
+		//	case reflect.Uint:
+		//	case reflect.Uint8:
+		//	case reflect.Uint16:
+		//	case reflect.Uint32:
+		//	case reflect.Uint64:
+		//	case reflect.Uintptr:
+		//	case reflect.Float32:
+		//	case reflect.Float64:
+		//	case reflect.Complex64:
+		//	case reflect.Complex128:
+		//	case reflect.Array:
+		//	case reflect.Chan:
+		//	case reflect.Func:
+		//	case reflect.Interface:
+		//	case reflect.Map:
+		//	case reflect.Ptr:
+		//	case reflect.Slice:
+	case reflect.String:
+		return ""
+	//	case reflect.Struct:
+	//	case reflect.UnsafePointer:
+	default:
+		return ""
+	}
 }
 
 //根据数据类型，转换为数据库对应字段类型，此处对应关系将依赖于数据库

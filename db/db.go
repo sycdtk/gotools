@@ -60,62 +60,81 @@ func connectDB(driverName string, dbName string) (*DBContext, error) {
 }
 
 // Execute  "INSERT INTO users(name,age) values(?,?)"
-func (c *DBContext) Execute(sql string, args ...interface{}) {
-	stmt, err := c.db.Prepare(sql)
+func (c *DBContext) Execute(execSql string, args ...interface{}) {
+	stmt, err := c.db.Prepare(execSql)
 
-	errtools.CheckErr(err, "创建Prepare失败:", sql, args)
+	errtools.CheckErr(err, "创建Prepare失败:", execSql, args)
 
 	result, err := stmt.Exec(args...)
 
-	errtools.CheckErr(err, "创建执行失败:", sql, args)
+	errtools.CheckErr(err, "创建执行失败:", execSql, args)
 
 	lastID, err := result.LastInsertId()
 
-	errtools.CheckErr(err, "创建失败:", sql, args)
+	errtools.CheckErr(err, "创建失败:", execSql, args)
 
-	logger.Debug("创建完成：", sql, args, lastID)
+	logger.Debug("创建完成：", execSql, args, lastID)
 }
 
 // Query  "SELECT * FROM users"
-func (c *DBContext) Query(sql string, args ...interface{}) {
+func (c *DBContext) Query(querySql string, args ...interface{}) [][]sql.RawBytes {
 
-	//	rows, err := c.db.Query(sql, args...)
-	//	errtools.CheckErr(err, "查询失败:", sql, args)
+	rows, err := c.db.Query(querySql, args...)
+	errtools.CheckErr(err, "查询失败:", querySql, args)
 
-	//	defer rows.Close()
+	defer rows.Close()
 
-	//	for rows.Next() {
-	//		err := rows.Scan(&result)
-	//		errtools.CheckErr(err, "查询失败:", sql, args)
-	//	}
+	cols, err := rows.Columns() // 获取列数
+	errtools.CheckErr(err, "查询失败:", querySql, args)
+
+	var results [][]sql.RawBytes
+
+	rowValue := make([]sql.RawBytes, len(cols))
+
+	row := make([]interface{}, len(cols))
+
+	for i := range rowValue {
+		row[i] = &rowValue[i]
+	}
+
+	for rows.Next() {
+		err = rows.Scan(row...)
+		errtools.CheckErr(err, "查询失败:", querySql, args)
+
+		results = append(results, rowValue)
+	}
+
+	logger.Debug("查询完成：", querySql, args)
+
+	return results
 }
 
 // UPDATE  "UPDATE users SET age = ? WHERE id = ?"
-func (c *DBContext) Update(sql string, args ...interface{}) {
+func (c *DBContext) Update(updateSql string, args ...interface{}) {
 
-	stmt, err := c.db.Prepare(sql)
-	errtools.CheckErr(err, "更新Prepare失败:", sql, args)
+	stmt, err := c.db.Prepare(updateSql)
+	errtools.CheckErr(err, "更新Prepare失败:", updateSql, args)
 
 	result, err := stmt.Exec(args...)
-	errtools.CheckErr(err, "更新执行失败:", sql, args)
+	errtools.CheckErr(err, "更新执行失败:", updateSql, args)
 
 	affectNum, err := result.RowsAffected()
 
-	errtools.CheckErr(err, "更新失败:", sql, args)
+	errtools.CheckErr(err, "更新失败:", updateSql, args)
 
-	logger.Debug("更新完成：", sql, args, affectNum)
+	logger.Debug("更新完成：", updateSql, args, affectNum)
 }
 
 // DELETE "DELETE FROM users WHERE id = ?"
-func (c *DBContext) Delete(sql string, args ...interface{}) {
-	stmt, err := c.db.Prepare(sql)
-	errtools.CheckErr(err, "删除Prepare失败:", sql, args)
+func (c *DBContext) Delete(delSql string, args ...interface{}) {
+	stmt, err := c.db.Prepare(delSql)
+	errtools.CheckErr(err, "删除Prepare失败:", delSql, args)
 
 	result, err := stmt.Exec(args...)
-	errtools.CheckErr(err, "删除执行失败:", sql, args)
+	errtools.CheckErr(err, "删除执行失败:", delSql, args)
 
 	affectNum, err := result.RowsAffected()
-	errtools.CheckErr(err, "删除失败:", sql, args)
+	errtools.CheckErr(err, "删除失败:", delSql, args)
 
-	logger.Debug("删除完成：", sql, args, affectNum)
+	logger.Debug("删除完成：", delSql, args, affectNum)
 }
