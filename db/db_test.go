@@ -21,32 +21,30 @@ func TestDB(t *testing.T) {
 	//		fmt.Print("file remove OK!")
 	//	}
 
-	//	DefaultDB().Execute(`CREATE TABLE
-	//    users
-	//    (
-	//        id INTEGER,
-	//        name TEXT,
-	//        age INTEGER
-	//    )`)
+	DB("").Execute("DROP TABLE users;")
 
-	//	DefaultDB().Execute(`CREATE TABLE
-	//    Chair
-	//    (
-	//        ID INTEGER,
-	//        Day TEXT
-	//    )`)
+	DB("").Execute(`CREATE TABLE
+	    users
+	    (
+	        id INTEGER,
+	        name TEXT,
+	        age INTEGER
+	    );`)
 
-	DefaultDB().Execute("INSERT INTO users(name,age) values(?,?)", "lirui", 20)
+	DB("").Execute("INSERT INTO users(name,age) values(?,?)", "lirui", 20)
 
-	DefaultDB().Update("UPDATE users SET age = ? WHERE name = ?", 18, "lirui")
+	DB("").Execute("UPDATE users SET age = ? WHERE name = ?", 18, "lirui")
 
-	results := DefaultDB().Query("SELECT name,age FROM users WHERE name = ?", "lirui")
+	results := DB("").Query("SELECT name,age FROM users")
 
 	for _, row := range results {
 
 		for _, cell := range row {
 
-			fmt.Println(string(cell))
+			if len(string(cell)) > 8 {
+			} else {
+				fmt.Println(string(cell))
+			}
 
 			//			rt := reflect.TypeOf(cell)
 			//			if rt.Kind() == reflect.Ptr {
@@ -69,5 +67,5 @@ func TestDB(t *testing.T) {
 		fmt.Println("")
 	}
 
-	DefaultDB().Delete("DELETE FROM users WHERE name = ?", "lirui")
+	DB("").Execute("DELETE FROM users WHERE name = ?", "lirui")
 }

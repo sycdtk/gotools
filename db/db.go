@@ -12,8 +12,14 @@ import (
 
 var dbPool map[string]*DBContext //多类型数据库连接池
 
+var defalutDB string //默认数据库
+
 //初始化数据库
 func init() {
+
+	//初始化数据库驱动1
+	db1 := config.Read("db", "db1")
+	defalutDB = db1 //默认数据库
 
 	driver1 := config.Read("db", "driver1")
 	conn1 := config.Read("db", "conn1")
@@ -23,23 +29,21 @@ func init() {
 	dbc1, err := connectDB(driver1, conn1)
 	errtools.CheckErr(err, "连接创建失败！")
 
-	dbPool[driver1] = dbc1
-}
+	dbPool[db1] = dbc1
 
-//默认数据库
-func DefaultDB() *DBContext {
-	defaultDB := config.Read("db", "default")
-	if dbc, ok := dbPool[defaultDB]; ok {
-		return dbc
-	}
-	return nil
 }
 
 //选择数据库连接
-func ChooseDB(dbName string) *DBContext {
+func DB(dbName string) *DBContext {
+
+	if dbName == "" {
+		dbName = defalutDB
+	}
+
 	if dbc, ok := dbPool[dbName]; ok {
 		return dbc
 	}
+
 	return nil
 }
 
@@ -60,32 +64,36 @@ func connectDB(driverName string, dbName string) (*DBContext, error) {
 }
 
 // Execute  "INSERT INTO users(name,age) values(?,?)"
+// UPDATE  "UPDATE users SET age = ? WHERE id = ?"
+// DELETE "DELETE FROM users WHERE id = ?"
+// Create "CREATE TABLE(...)"
+// Drop "DROP TABLE..."
 func (c *DBContext) Execute(execSql string, args ...interface{}) {
 	stmt, err := c.db.Prepare(execSql)
 
-	errtools.CheckErr(err, "创建Prepare失败:", execSql, args)
+	errtools.CheckErr(err, "SQL Prepare失败:", execSql, args)
 
 	result, err := stmt.Exec(args...)
 
-	errtools.CheckErr(err, "创建执行失败:", execSql, args)
+	errtools.CheckErr(err, "SQL 执行失败:", execSql, args)
 
-	lastID, err := result.LastInsertId()
+	lastID, _ := result.LastInsertId()
 
-	errtools.CheckErr(err, "创建失败:", execSql, args)
+	affectNum, _ := result.RowsAffected()
 
-	logger.Debug("创建完成：", execSql, args, lastID)
+	logger.Debug("SQL执行完成：", execSql, args, "，最后插入ID：", lastID, "，受影响行数：", affectNum)
 }
 
 // Query  "SELECT * FROM users"
 func (c *DBContext) Query(querySql string, args ...interface{}) [][]sql.RawBytes {
 
 	rows, err := c.db.Query(querySql, args...)
-	errtools.CheckErr(err, "查询失败:", querySql, args)
+	errtools.CheckErr(err, "SQL 查询失败:", querySql, args)
 
 	defer rows.Close()
 
 	cols, err := rows.Columns() // 获取列数
-	errtools.CheckErr(err, "查询失败:", querySql, args)
+	errtools.CheckErr(err, "SQL 获取结果失败:", querySql, args)
 
 	var results [][]sql.RawBytes
 
@@ -99,42 +107,12 @@ func (c *DBContext) Query(querySql string, args ...interface{}) [][]sql.RawBytes
 
 	for rows.Next() {
 		err = rows.Scan(row...)
-		errtools.CheckErr(err, "查询失败:", querySql, args)
+		errtools.CheckErr(err, "SQL 结果解析失败:", querySql, args)
 
 		results = append(results, rowValue)
 	}
 
-	logger.Debug("查询完成：", querySql, args)
+	logger.Debug("SQL 查询完成：", querySql, args)
 
 	return results
-}
-
-// UPDATE  "UPDATE users SET age = ? WHERE id = ?"
-func (c *DBContext) Update(updateSql string, args ...interface{}) {
-
-	stmt, err := c.db.Prepare(updateSql)
-	errtools.CheckErr(err, "更新Prepare失败:", updateSql, args)
-
-	result, err := stmt.Exec(args...)
-	errtools.CheckErr(err, "更新执行失败:", updateSql, args)
-
-	affectNum, err := result.RowsAffected()
-
-	errtools.CheckErr(err, "更新失败:", updateSql, args)
-
-	logger.Debug("更新完成：", updateSql, args, affectNum)
-}
-
-// DELETE "DELETE FROM users WHERE id = ?"
-func (c *DBContext) Delete(delSql string, args ...interface{}) {
-	stmt, err := c.db.Prepare(delSql)
-	errtools.CheckErr(err, "删除Prepare失败:", delSql, args)
-
-	result, err := stmt.Exec(args...)
-	errtools.CheckErr(err, "删除执行失败:", delSql, args)
-
-	affectNum, err := result.RowsAffected()
-	errtools.CheckErr(err, "删除失败:", delSql, args)
-
-	logger.Debug("删除完成：", delSql, args, affectNum)
 }
