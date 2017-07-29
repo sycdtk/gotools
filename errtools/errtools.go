@@ -2,7 +2,7 @@ package errtools
 
 import (
 	"errors"
-	"os"
+	//	"os"
 
 	"github.com/sycdtk/gotools/logger"
 )
@@ -17,6 +17,6 @@ func NewErr(errStr string) error {
 func CheckErr(err error, errStr ...interface{}) {
 	if err != nil {
 		logger.Err3("异常：", errStr, err)
-		os.Exit(1)
+		//os.Exit(1)
 	}
 }

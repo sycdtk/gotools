@@ -21,7 +21,11 @@ func TestDB(t *testing.T) {
 	//		fmt.Print("file remove OK!")
 	//	}
 
+	fmt.Println(DB("").TableExist("users"))
+
 	DB("").Execute("DROP TABLE users;")
+
+	fmt.Println(DB("").TableExist("users"))
 
 	DB("").Execute(`CREATE TABLE
 	    users
@@ -30,6 +34,8 @@ func TestDB(t *testing.T) {
 	        name TEXT,
 	        age INTEGER
 	    );`)
+
+	fmt.Println(DB("").TableExist("users"))
 
 	DB("").Execute("INSERT INTO users(name,age) values(?,?)", "lirui", 20)
 

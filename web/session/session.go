@@ -69,7 +69,7 @@ func (sm *SessionManager) Start(w http.ResponseWriter, r *http.Request) (session
 		expiration := time.Now()
 		cookie := http.Cookie{Name: sm.cookieName, Expires: expiration, Path: "/", HttpOnly: true, MaxAge: -1}
 		http.SetCookie(w, &cookie)
-		logger.Info("session ID 不存在，页面跳转至登录界面！")
+		logger.Debug("session ID 不存在，页面跳转至登录界面！")
 		http.Redirect(w, r, "/login", http.StatusFound)
 	} else { //cookie value值不为空
 
@@ -81,7 +81,7 @@ func (sm *SessionManager) Start(w http.ResponseWriter, r *http.Request) (session
 			expiration := time.Now()
 			cookie := http.Cookie{Name: sm.cookieName, Expires: expiration, Path: "/", HttpOnly: true, MaxAge: -1}
 			http.SetCookie(w, &cookie)
-			logger.Info("session ID 不存在，页面跳转至登录界面！")
+			logger.Debug("session ID 不存在，页面跳转至登录界面！")
 			http.Redirect(w, r, "/login", http.StatusFound)
 		}
 

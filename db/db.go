@@ -116,3 +116,8 @@ func (c *DBContext) Query(querySql string, args ...interface{}) [][]sql.RawBytes
 
 	return results
 }
+
+//检查数据库表是否存在
+func (c *DBContext) TableExist(tableName string) bool {
+	return len(c.Query("select name from sqlite_master where type='table' and name=?", tableName)) > 0
+}
