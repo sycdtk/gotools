@@ -58,7 +58,7 @@ func (sm *SessionManager) Start(w http.ResponseWriter, r *http.Request) (session
 
 	cookie, err := r.Cookie(sm.cookieName)
 
-	if r.Method == "POST" && r.URL.Path == "/login" && (err != nil || cookie.Value == "") { //登录，cookie为空，新建session
+	if r.Method == http.MethodPost && r.URL.Path == "/login" && (err != nil || cookie.Value == "") { //登录，cookie为空，新建session
 		sessionID := sm.sessionID()
 
 		session, _ = sm.provider.Init(sessionID)

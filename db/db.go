@@ -97,19 +97,19 @@ func (c *DBContext) Query(querySql string, args ...interface{}) [][]sql.RawBytes
 
 	var results [][]sql.RawBytes
 
-	rowValue := make([]sql.RawBytes, len(cols))
-
-	row := make([]interface{}, len(cols))
-
-	for i := range rowValue {
-		row[i] = &rowValue[i]
-	}
-
 	for rows.Next() {
-		err = rows.Scan(row...)
+
+		r := make([]interface{}, len(cols))
+		rv := make([]sql.RawBytes, len(cols))
+
+		for i := range rv {
+			r[i] = &rv[i]
+		}
+
+		err = rows.Scan(r...)
 		errtools.CheckErr(err, "SQL 结果解析失败:", querySql, args)
 
-		results = append(results, rowValue)
+		results = append(results, rv)
 	}
 
 	logger.Debug("SQL 查询完成：", querySql, args)
