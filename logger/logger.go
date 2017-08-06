@@ -37,10 +37,13 @@ func init() {
 func SetLevel(lvl string) {
 	if lvl == DEBUG {
 		mylogger.level = ldebug
+		mylogger.SetFlags(log.LstdFlags | log.Lshortfile) //设置输出格式
 	} else if lvl == INFO {
 		mylogger.level = linfo
+		mylogger.SetFlags(log.LstdFlags) //设置输出格式
 	} else if lvl == ERROR {
 		mylogger.level = lerror
+		mylogger.SetFlags(log.LstdFlags | log.Lshortfile) //设置输出格式
 	}
 }
 
@@ -116,7 +119,5 @@ func NewLogger() {
 		if len(logLevel) > 0 {
 			SetLevel(logLevel) //设置日志级别
 		}
-
-		mylogger.SetFlags(log.LstdFlags | log.Lshortfile) //设置输出格式
 	})
 }
