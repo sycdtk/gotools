@@ -1,17 +1,17 @@
 package stack
 
 //简单栈对象
-type stack struct {
+type Stack struct {
 	datas []string
 }
 
 //压栈
-func Push(s *stack, v string) {
+func Push(s *Stack, v string) {
 	s.datas = append(s.datas, v)
 }
 
 //出栈
-func Pop(s *stack) (r string) {
+func Pop(s *Stack) (r string) {
 	if !Empty(s) {
 		l := len(s.datas)
 		r = s.datas[l-1]
@@ -21,11 +21,11 @@ func Pop(s *stack) (r string) {
 }
 
 //栈是否为空
-func Empty(s *stack) bool {
+func Empty(s *Stack) bool {
 	return len(s.datas) == 0
 }
 
 //新建栈
-func NewStack() *stack {
-	return &stack{}
+func NewStack() *Stack {
+	return &Stack{}
 }

@@ -12,4 +12,11 @@ func TestParse(t *testing.T) {
 		t.Fatal(Parse(s))
 	}
 
+	s = "@SUB(@PLU(1,@PLU(2,3)),@PLU(1,2))"
+	if Parse(s) == "1 2 3 @PLU @PLU 1 2 @PLU @SUB" {
+		t.Log(Parse(s))
+	} else {
+		t.Fatal(Parse(s))
+	}
+
 }

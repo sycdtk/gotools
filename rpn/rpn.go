@@ -13,14 +13,15 @@ const (
 	rightParenthesis = ")" //右小括号，需要区分函数括号还是运算符括号
 )
 
-var functionNames = []string{"@LOG", "@LOG10", "@EXP", "@SQRT", "@ABS", "@INTERP",
+var functionNames = []string{
+	"@LOG", "@LOG10", "@EXP", "@SQRT", "@ABS", "@INTERP",
 	"@INTERPBAD", "@CAV", "@EFILT", "@DIFF", "@INTEG",
 	"@SHIFT", "@VALIM", "@MKBAD", "@LOCLP", "@HICLP",
 	"@MAX", "@MIN", "@IF", "@EQ", "@NE",
 	"@GT", "@GE", "@LT", "@LE", "@OR",
 	"@AND", "@NOT", "@BADVAL", "@PCT2", "@PFPCT",
 	"@REFPCT", "@SELECT", "@MAPRANGE", "@SPLINE",
-	"@ADD", "@SUB", "@MUL", "@DIV", "@POW"} //函数名称
+	"@PLU", "@SUB", "@MUL", "@DIV", "@POW"} //函数名称
 
 //表达式解析函数
 //输入表达式串，输出逆波兰表达式结果
@@ -66,8 +67,8 @@ func Parse(exp string) (rpn string) {
 }
 
 //表达式预处理，对函数名称或符号名称关键字进行拆分
-//例如输入：@EQ(SREIND,1)/100
-//输出为：@EQ ( SREIND,1 )  / 100
+//例如输入：@EQ(SREIND,1)
+//输出为：@EQ ( SREIND,1 )
 func prepare(exp string) string {
 
 	//处理函数名称

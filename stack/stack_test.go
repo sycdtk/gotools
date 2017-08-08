@@ -24,3 +24,49 @@ func TestStack(t *testing.T) {
 		t.Fatal(v, "aaa")
 	}
 }
+
+func BenchmarkStack(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		s := NewStack()
+		Push(s, "aaa")
+		Push(s, "b")
+		Push(s, "ww")
+		Push(s, "qq")
+		Pop(s)
+		Pop(s)
+		Push(s, "b")
+		Push(s, "ww")
+		Push(s, "b")
+		Push(s, "ww")
+		Push(s, "b")
+		Push(s, "ww")
+		Pop(s)
+		Pop(s)
+		Pop(s)
+		Pop(s)
+	}
+}
+
+func BenchmarkConcurrency(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			s := NewStack()
+			Push(s, "aaa")
+			Push(s, "b")
+			Push(s, "ww")
+			Push(s, "qq")
+			Pop(s)
+			Pop(s)
+			Push(s, "b")
+			Push(s, "ww")
+			Push(s, "b")
+			Push(s, "ww")
+			Push(s, "b")
+			Push(s, "ww")
+			Pop(s)
+			Pop(s)
+			Pop(s)
+			Pop(s)
+		}
+	})
+}
