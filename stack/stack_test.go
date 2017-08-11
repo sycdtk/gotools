@@ -10,12 +10,25 @@ func TestStack(t *testing.T) {
 	Push(s, "b")
 	Push(s, "ww")
 
+	if Top(s) == "ww" {
+		t.Log(Top(s), "ww")
+	} else {
+		t.Fatal(Top(s), "ww")
+	}
+
 	if v := Pop(s); v == "ww" {
 		t.Log(v, "ww")
 	} else {
 		t.Fatal(v, "ww")
 	}
-	Push(s, "qq")
+	Push(s, "qq1")
+
+	if Top(s) == "qq1" {
+		t.Log(Top(s), "qq1")
+	} else {
+		t.Fatal(Top(s), "qq1")
+	}
+
 	Pop(s)
 	Pop(s)
 	if v := Pop(s); v == "aaa" {

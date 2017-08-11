@@ -25,6 +25,14 @@ func Empty(s *Stack) bool {
 	return len(s.datas) == 0
 }
 
+//返回栈顶元素
+func Top(s *Stack) (r string) {
+	if len(s.datas) > 0 {
+		r = s.datas[len(s.datas)-1]
+	}
+	return
+}
+
 //新建栈
 func NewStack() *Stack {
 	return &Stack{}

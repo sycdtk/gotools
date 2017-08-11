@@ -8,13 +8,14 @@ import (
 
 const (
 	space            = " " //空格占位
+	separator        = "|" //分隔符，区分函数逆波兰序列中不定参数函数的参数个数
 	comma            = "," //逗号分隔符，分隔函数参数
 	leftParenthesis  = "(" //左小括号，需要区分函数括号还是运算符括号
 	rightParenthesis = ")" //右小括号，需要区分函数括号还是运算符括号
 )
 
 var functionNames = []string{
-	"@LOG", "@LOG10", "@EXP", "@SQRT", "@ABS", "@INTERP",
+	"@LG", "@LN", "@EXP", "@SQRT", "@ABS", "@INTERP",
 	"@INTERPBAD", "@CAV", "@EFILT", "@DIFF", "@INTEG",
 	"@SHIFT", "@VALIM", "@MKBAD", "@LOCLP", "@HICLP",
 	"@MAX", "@MIN", "@IF", "@EQ", "@NE",
@@ -35,6 +36,10 @@ func Parse(exp string) (rpn string) {
 
 		if isFN(foo) { //是函数名则压栈
 			stack.Push(s, foo)
+			if len(rpn) > 0 {
+				rpn += space
+			}
+			rpn += separator //增加函数参数长度截止标记
 		} else {
 			switch foo {
 			case leftParenthesis: //"(" 左括号则压栈
@@ -42,14 +47,14 @@ func Parse(exp string) (rpn string) {
 			case rightParenthesis: //")" 右括号则出栈，按函数方式处理
 				for {
 					fn := stack.Pop(s)
-					if fn == leftParenthesis { //忽略左括号
+					if fn == leftParenthesis { //函数表达式时，忽略左括号，跳出循环
+						rpn += space + stack.Pop(s)
+						break
 					} else {
 						rpn += space + fn
-						if isFN(fn) { //若为函数表达式名称，跳出循环
-							break
-						}
 					}
 				}
+
 			case comma: //","分隔符不做处理
 			default: //追加参数
 				if len(rpn) > 0 {
