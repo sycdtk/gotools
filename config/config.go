@@ -125,3 +125,14 @@ func (c config) read(node, key string) string {
 func Read(node, key string) string {
 	return conf.read(node, key)
 }
+
+//获取分组列表
+func GetNode(node string) map[string]string {
+	data := make(map[string]string)
+	for key, value := range conf.confMap {
+		if strings.HasPrefix(key, node) {
+			data[key[len(node):len(key)]] = value
+		}
+	}
+	return data
+}
