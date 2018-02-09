@@ -42,5 +42,17 @@ func TestRead(t *testing.T) {
 		t.Fatal("dsnName     = DSN=watch1")
 	}
 
+	if "wrong" != Read("test", "somet[hi]ng") {
+		t.Fatal("wrong     = somet[hi]ng")
+	}
+
 	t.Log("success!")
+}
+
+func TestLoad(t *testing.T) {
+	Load("config1.conf")
+	if "11111111" != Read("www", "aaa") {
+		t.Fatal("[www]aaa != 11111111")
+	}
+
 }

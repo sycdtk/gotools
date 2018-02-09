@@ -8,15 +8,21 @@ import (
 	"strings"
 )
 
-const (
-	configName = "config.conf" //默认配置文件名称
-)
+var configName = "config.conf" //默认配置文件名称
 
 var conf *config
 
 //初始化
 func init() {
 	conf = &config{}
+	_, err := os.Stat(configName)
+	if err == nil || os.IsExist(err) {
+		conf.initConfig(configName)
+	}
+}
+
+func Load(configFile string) {
+	configName = configFile
 	conf.initConfig(configName)
 }
 
@@ -62,6 +68,7 @@ func (c *config) initConfig(path string) {
 			continue
 		}
 
+		//TODO:key中包含[] 会读取失败
 		n1 := strings.Index(s, "[")
 		n2 := strings.LastIndex(s, "]")
 		if n1 > -1 && n2 > -1 && n2 > n1+1 {
